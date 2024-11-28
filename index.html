@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lista de Compras</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f5f5f5;
+      color: #333;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    #forms-container {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+    }
+
+    .category {
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 15px;
+      width: 250px;
+      margin: 10px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .category h2 {
+      margin-top: 0;
+    }
+
+    input {
+      width: calc(100% - 20px);
+      padding: 5px;
+      margin-bottom: 10px;
+    }
+
+    button {
+      padding: 5px 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    ol {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Lista de Compras</h1>
+  <div id="forms-container">
+    <div class="category">
+      <h2>Limpeza</h2>
+      <input type="text" id="limpeza-input" placeholder="Digite o item">
+      <button onclick="addItem('limpeza')">Adicionar</button>
+      <ol id="limpeza-list"></ol>
+    </div>
+
+    <div class="category">
+      <h2>Frutas</h2>
+      <input type="text" id="frutas-input" placeholder="Digite o item">
+      <button onclick="addItem('frutas')">Adicionar</button>
+      <ol id="frutas-list"></ol>
+    </div>
+
+    <div class="category">
+      <h2>Mercearia</h2>
+      <input type="text" id="mercearia-input" placeholder="Digite o item">
+      <button onclick="addItem('mercearia')">Adicionar</button>
+      <ol id="mercearia-list"></ol>
+    </div>
+
+    <div class="category">
+      <h2>Congelados</h2>
+      <input type="text" id="congelados-input" placeholder="Digite o item">
+      <button onclick="addItem('congelados')">Adicionar</button>
+      <ol id="congelados-list"></ol>
+    </div>
+  </div>
+
+  <script>
+    function addItem(category) {
+      const input = document.getElementById(`${category}-input`);
+      const list = document.getElementById(`${category}-list`);
+
+      const item = input.value.trim();
+      if (item !== "") {
+        const listItem = document.createElement("li");
+        listItem.textContent = item;
+        list.appendChild(listItem);
+        input.value = ""; // Limpa o campo de texto
+      } else {
+        alert("Por favor, digite um item antes de adicionar!");
+      }
+    }
+  </script>
+</body>
+</html>
