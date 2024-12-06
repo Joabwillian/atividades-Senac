@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Movie Carousel</title>
+  <style>
+    /* Estilos básicos */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: white;
+      margin: 0;
+      padding: 0;
+    }
+ 
+    .carousel-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow-x: auto;
+      padding: 20px;
+      scroll-snap-type: x mandatory;
+      gap: 20px;
+    }
+ 
+    .movie-card {
+      flex: 0 0 300px;
+      scroll-snap-align: center;
+      background-color: #1c1c1c;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+ 
+    .movie-card:hover {
+      transform: scale(1.1);
+    }
+ 
+    .movie-poster {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+    }
+ 
+    .movie-info {
+      padding: 10px;
+      text-align: center;
+    }
+ 
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      justify-content: center;
+      align-items: center;
+    }
+ 
+    .modal-content {
+      background-color: #1c1c1c;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      max-width: 400px;
+      width: 80%;
+    }
+ 
+    .modal-content h2 {
+      margin-bottom: 20px;
+    }
+ 
+    .button-container {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+    }
+ 
+    .modal-button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      background-color: #007BFF;
+      color: white;
+      transition: background-color 0.3s ease;
+    }
+ 
+    .modal-button:hover {
+      background-color: #0056b3;
+    }
+ 
+    .close-button {
+      background-color: #FF0000;
+      margin-top: 20px;
+    }
+ 
+    .times-container {
+      display: none;
+      margin-top: 20px;
+    }
+ 
+    .time-button {
+      background-color: #28a745;
+      margin: 5px;
+    }
+ 
+    .time-button:hover {
+      background-color: #218838;
+    }
+  </style>
+</head>
+<body>
+  <h1 style="text-align: center; padding: 10px;">Terrinha Flix</h1>
+  <div class="carousel-container">
+    <!-- Filmes -->
+    <div class="movie-card" onclick="showModal('Duna: A Profecia')">
+      <img class="poster" src="https://media.themoviedb.org/t/p/w300_and_h450_bestv2/kGRWWvRpI2SVDYnvM3gJb21X0QL.jpg" alt="Duna: A Profecia">
+      <div class="movie-info">Duna: A Profecia</div>
+    </div>
+    <div class="movie-card" onclick="showModal('Deadpool & Wolverine')">
+      <img class="poster" src="https://media.themoviedb.org/t/p/w300_and_h450_bestv2/cJFqqiDYprqExaXatu4AaoMzDG2.jpg" alt="Deadpool & Wolverine">
+      <div class="movie-info">Deadpool & Wolverine</div>
+    </div>
+    <div class="movie-card" onclick="showModal('La La Land: Cantando Estações')">
+      <img class="poster" src="https://media.themoviedb.org/t/p/w300_and_h450_bestv2/uBVUXmN8tax7eoQdDw6DdbEoZwc.jpg" alt="La La Land: Cantando Estações">
+      <div class="movie-info">La La Land: Cantando Estações</div>
+    </div>
+    <div class="movie-card" onclick="showModal('Alien: Romulus')">
+      <img class="poster" src="https://media.themoviedb.org/t/p/w300_and_h450_bestv2/jB0W9tn4w07MFn7sTfqRTBLVytF.jpg" alt="Alien: Romulus">
+      <div class="movie-info">Alien: Romulus</div>
+    </div>
+    <div class="movie-card" onclick="showModal('O Grinch')">
+      <img class="poster" src="https://media.themoviedb.org/t/p/w300_and_h450_bestv2/5poxwRAZevFjiYJAH8lLFaFeKr7.jpg" alt="O Grinch">
+      <div class="movie-info">O Grinch</div>
+    </div>
+  </div>
+ 
+  <!-- Modal -->
+  <div class="modal" id="movieModal">
+    <div class="modal-content">
+      <h2 id="modalTitle"></h2>
+      <p>Escolha sua sala:</p>
+      <div class="button-container">
+        <a href="cinema.html">
+
+       
+        <button class="modal-button" onclick="showTimes()">Sala Normal</button> 
+      </a>
+      <a href="cinema.html">
+        <button class="modal-button">Sala VIP</button>
+      </a>
+      </div>
+      <div class="times-container" id="timesContainer">
+        
+        <p>Horários disponíveis:</p>
+        <button class="modal-button time-button">18:00</button>
+        <button class="modal-button time-button">20:00</button>
+        <button class="modal-button time-button">22:00</button>
+      </div>
+      <button class="modal-button close-button" onclick="closeModal()">Fechar</button>
+    </div>
+  </div>
+ 
+  <script>
+    // Exibir o modal
+    function showModal(movieTitle) {
+      document.getElementById('modalTitle').textContent = movieTitle;
+      document.getElementById('movieModal').style.display = 'flex';
+      document.getElementById('timesContainer').style.display = 'none'; // Oculta os horários inicialmente
+    }
+ 
+    // Exibir os horários
+    function showTimes() {
+      document.getElementById('timesContainer').style.display = 'block';
+    }
+ 
+    // Fechar o modal
+    function closeModal() {
+      document.getElementById('movieModal').style.display = 'none';
+    }
+  </script>
+</body>
+</html>

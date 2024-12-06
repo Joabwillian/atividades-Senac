@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cinema - Escolha de Cadeiras</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .filmes {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .filme {
+            padding: 10px;
+            background-color: #eee;
+            margin: 0 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .filme.selecionado {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .carrossel {
+            display: flex;
+        }
+
+        .prev, .next {
+            cursor: pointer;
+            font-size: 24px;
+            padding: 10px;
+            background-color: #ddd;
+            border: none;
+            margin: 0 10px;
+            border-radius: 5px;
+        }
+
+        .sala {
+            margin: 20px 0;
+        }
+
+        .cadeiras {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .cadeira {
+            width: 30px;
+            height: 30px;
+            background-color: #ccc;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .cadeira.selecionada {
+            background-color: #ffeb3b;
+        }
+
+        .cadeira.reservada {
+            background-color: #f44336;
+        }
+
+        #aviso {
+            text-align: center;
+            padding: 10px;
+            background-color: #ff9800;
+            color: white;
+            display: none;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 50%;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            right: 10px;
+            top: 5px;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+        }
+
+        .sala button {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Escolha seu lugar no Cinema</h1>
+
+        <div class="filmes">
+            <h2>Escolha seu filme</h2>
+            <div class="carrossel" id="carrosselFilmes">
+                <div class="filme" data-filme="filme1">Filme 1</div>
+                <div class="filme" data-filme="filme2">Filme 2</div>
+                <div class="filme" data-filme="filme3">Filme 3</div>
+            </div>
+            <div class="prev" id="prevFilmes">&#10094;</div>
+            <div class="next" id="nextFilmes">&#10095;</div>
+        </div>
+
+        <div id="aviso" class="aviso">
+            O cinema só está disponível durante a noite, das 18:00 às 23:59.
+        </div>
+
+        <div class="sala" id="salaNormal">
+            <h2>Sala Normal (75 Cadeiras)</h2>
+            <div class="cadeiras" id="cadeirasNormal"></div>
+            <button id="reservarNormal">Reservar Sala Normal</button>
+        </div>
+
+        <div class="sala" id="salaVIP">
+            <h2>Sala VIP (35 Cadeiras)</h2>
+            <div class="cadeiras" id="cadeirasVIP"></div>
+            <button id="reservarVIP">Reservar Sala VIP</button>
+        </div>
+    </div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <span class="close" id="closeModal">&times;</span>
+            <h2>Escolha sua data e horário</h2>
+            <label for="data">Data:</label>
+            <input type="date" id="data">
+            <label for="horario">Horário:</label>
+            <select id="horario">
+                <option value="18:00">18:00</option>
+                <option value="19:00">19:00</option>
+                <option value="20:00">20:00</option>
+                <option value="21:00">21:00</option>
+                <option value="22:00">22:00</option>
+                <option value="23:00">23:00</option>
+            </select>
+            <button id="confirmarReserva">Confirmar Reserva</button>
+        </div>
+    </div>
+
+    <script>
+        let cadeiraSelecionada = null;
+        let filmeSelecionado = null;
+        let reservasPorFilme = {
+            filme1: [],
+            filme2: [],
+            filme3: []
+        };
+
+        // Função para verificar o horário
+        function verificarHorario() {
+            const horaAtual = new Date().getHours();
+            const aviso = document.getElementById('aviso');
+            const conteudo = document.querySelector('.container');
+
+            if (horaAtual >= 18 && horaAtual < 24) {
+                aviso.style.display = 'none';
+                conteudo.style.display = 'block';
+            } else {
+                aviso.style.display = 'block';
+                conteudo.style.display = 'none';
+            }
+        }
+
+        // Função para criar cadeiras
+        function criarCadeiras(salaId, numCadeiras) {
+            const sala = document.getElementById(salaId);
+            for (let i = 0; i < numCadeiras; i++) {
+                const cadeira = document.createElement('div');
+                cadeira.classList.add('cadeira');
+                cadeira.addEventListener('click', () => selecionarCadeira(cadeira));
+                sala.appendChild(cadeira);
+            }
+        }
+
+        // Função para selecionar a cadeira
+        function selecionarCadeira(cadeira) {
+            if (!cadeira.classList.contains('reservada')) {
+                cadeira.classList.toggle('selecionada');
+                cadeiraSelecionada = cadeira.classList.contains('selecionada') ? cadeira : null;
+            }
+        }
+
+        // Função para abrir o modal de reserva
+        function abrirModal(filme) {
+            filmeSelecionado = filme;
+            const modal = document.getElementById('modal');
+            modal.style.display = 'flex';
+
+            // Atualizar as cadeiras com base nas reservas
+            atualizarCadeirasReservadas();
+        }
+
+        // Fechar o modal
+        document.getElementById('closeModal').addEventListener('click', () => {
+            document.getElementById('modal').style.display = 'none';
+        });
+
+        // Confirmar a reserva
+        document.getElementById('confirmarReserva').addEventListener('click', () => {
+            if (cadeiraSelecionada) {
+                const filme = filmeSelecionado;
+                const data = document.getElementById('data').value;
+                const horario = document.getElementById('horario').value;
+
+                if (!data || !horario) {
+                    alert('Por favor, selecione a data e o horário.');
+                    return;
+                }
+
+                // Adicionar à lista de reservas do filme
+                reservasPorFilme[filme].push({
+                    cadeira: cadeiraSelecionada,
+                    data: data,
+                    horario: horario
+                });
+
+                // Atualizar a cadeira para reservada
+                cadeiraSelecionada.classList.add('reservada');
+                cadeiraSelecionada.classList.remove('selecionada');
+
+                alert(`Reserva Confirmada! \nFilme: ${filme} \nData: ${data} \nHorário: ${horario}`);
+
+                document.getElementById('modal').style.display = 'none';
+            }
+        });
+
+        // Atualizar as cadeiras reservadas
+        function atualizarCadeirasReservadas() {
+            // Limpar a seleção de cadeiras
+            const cadeiras = document.querySelectorAll('.cadeira');
+            cadeiras.forEach(cadeira => {
+                cadeira.classList.remove('selecionada');
+            });
+
+            // Limpar todas as cadeiras antes de adicionar novas reservas
+            const salas = document.querySelectorAll('.cadeiras');
+            salas.forEach(sala => {
+                sala.querySelectorAll('.cadeira').forEach(cadeira => {
+                    cadeira.classList.remove('reservada');
+                });
+            });
+
+            // Verificar reservas para o filme atual e marcar as cadeiras
+            const reservas = reservasPorFilme[filmeSelecionado];
+            reservas.forEach(reserva => {
+                reserva.cadeira.classList.add('reservada');
+            });
+        }
+
+        // Selecionar o filme
+        document.querySelectorAll('.filme').forEach(filme => {
+            filme.addEventListener('click', () => {
+                // Limpar a seleção e as cadeiras
+                document.querySelectorAll('.filme').forEach(f => f.classList.remove('selecionado'));
+                filme.classList.add('selecionado');
+
+                // Desmarcar todas as cadeiras
+                const cadeiras = document.querySelectorAll('.cadeira');
+                cadeiras.forEach(cadeira => {
+                    cadeira.classList.remove('reservada', 'selecionada');
+                });
+
+                abrirModal(filme.dataset.filme);
+            });
+        });
+
+        // Inicialização
+        verificarHorario();
+        criarCadeiras('cadeirasNormal', 75);
+        criarCadeiras('cadeirasVIP', 35);
+    </script>
+</body>
+</html>
